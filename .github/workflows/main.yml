@@ -2,11 +2,12 @@ name: Fetch GitHub Data
 
 on:
   schedule:
-    - cron: "30 10 * * *" 
+    - cron: "30 10 * * *" # Run every hour
   issues:
     type:
-     -closed
      -opened
+     -closed
+    
   
 
 jobs:
@@ -17,16 +18,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Install Dependencies
-        run: npm install
-
       - name: Fetch GitHub Data
-        run: node fetch-data-script.js
+        run: |
+          # Use curl or other tools to fetch data from the GitHub API
+          curl -H "Authorization: Bearer ${{ secrets.GRAFANA_TOKEN }}" https://api.github.com/repos/Prasanna-source31/Test/issues > data.json
 
       - name: Store Data as Artifact
         uses: actions/upload-artifact@v2
