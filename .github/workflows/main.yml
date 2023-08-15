@@ -23,8 +23,8 @@ jobs:
           # Use curl or other tools to fetch data from the GitHub API
           curl -H "Authorization: Bearer ${{ secrets.GRAFANA_TOKEN }}" https://api.github.com/repos/Prasanna-source31/Test/issues > data.json
 
-      - name: Store Data as Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: github-data
-          path: data.json
+      - name: Store Data File
+        run: mv data.json $GITHUB_WORKSPACE
+
+      - name: List Files
+        run: ls -R $GITHUB_WORKSPACE
