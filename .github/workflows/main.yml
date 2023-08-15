@@ -21,10 +21,10 @@ jobs:
       - name: Fetch GitHub Data
         run: |
           # Use curl or other tools to fetch data from the GitHub API
-          curl -H "Authorization: Bearer ${{ secrets.GRAFANA_TOKEN }}" https://api.github.com/repos/Prasanna-source31/Test/issues > data1.json
+          curl -H "Authorization: Bearer ${{ secrets.GRAFANA_TOKEN }}" https://api.github.com/repos/Prasanna-source31/Test/issues > data.json
 
       - name: Store Data File
-        run: mv data1.json $GITHUB_WORKSPACE
+        run: mv data.json $GITHUB_WORKSPACE/data.json
 
       - name: List Files
         run: ls -R $GITHUB_WORKSPACE
