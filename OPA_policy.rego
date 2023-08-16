@@ -14,13 +14,15 @@ deny_publicly_exposed_resources {
 # Rule to deny instances without required tags
 deny_missing_required_tags {
     required_tags := {"Environment", "Owner"}
-    resource_tags := input.resource.attributes.tags[_].key
-    not contains(required_tags, resource_tags)
+    resource_tags := {tag | tag = input.resource.attributes.tags[_].key}
+    not required_tags { tag }
 }
 
 # Rule to deny resources with sensitive tags in clear text
 deny_sensitive_tags_clear_text {
-    input.resource.attributes.tags[_].value =~ "password|secret"
+    sensitive_tags := {"password", "secret"}
+    input.resource.attributes.tags[_].value = tag_value
+    tag_value == sensitive_tags[_]
 }
 
 # Rule to deny S3 buckets with public access
