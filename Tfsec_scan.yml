@@ -14,6 +14,10 @@ stages:
     - script: |
         # Pull the tfsec Docker image
         docker pull aquasec/tfsec
+        # List all Terraform files for scanning
+        TERRAFORM_FILES=$(find $(Build.SourcesDirectory) -name "*.tf")
+        echo "Terraform files for scanning:"
+        echo "$TERRAFORM_FILES"
 
         # Run tfsec using the Docker image on your Terraform code
         docker run --rm -v $(Build.SourcesDirectory):/tfsec aquasec/tfsec
