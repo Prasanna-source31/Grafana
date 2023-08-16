@@ -2,6 +2,9 @@ trigger: none
 
 pool:
   vmImage: ubuntu-latest
+variables:
+- name: PAT  # Define your PAT variable
+  value: $(PAT_Terrascan)
 
 stages:
 - stage: validate
@@ -19,6 +22,7 @@ stages:
       displayName: 'Download tool'
 
     - script: |
+        git config --global http.extraheader "Authorization: bearer $(PAT)"
         git clone https://github.com/Prasanna-source31/Grafana/ grafana-repo
         cd grafana-repo
         terrascan scan --exit-one
