@@ -23,7 +23,7 @@ stages:
 
     - script: |
         git config --global http.extraheader "Authorization: bearer $(PAT)"
-        git clone https://github.com/Prasanna-source31/Grafana/ grafana-repo
+        git clone https://$(PAT)@github.com/Prasanna-source31/Grafana.git grafana-repo
         cd grafana-repo
         terrascan scan --exit-one
       displayName: 'Run Terrascan'
