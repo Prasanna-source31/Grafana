@@ -1,0 +1,31 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: validate
+  jobs:
+  - job: SecurityScan
+    displayName: 'Run OPA Scan'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        # Pull the OPA Docker image
+        docker pull openpolicyagent/opa:latest
+
+        # Run OPA against Terraform code using Docker
+        docker run --rm -v $(Build.SourcesDirectory):/data openpolicyagent/opa eval -i /data -f pretty -d /data/OPA_policy.rego
+
+        # Capture the exit code of the OPA evaluation
+        OPA_EXIT_CODE=$?
+
+        # Check the exit code and exit accordingly
+        if [ $OPA_EXIT_CODE -eq 0 ]; then
+          echo "OPA scan passed successfully."
+        else
+          echo "OPA scan failed with policy violations."
+        fi
+        exit $OPA_EXIT_CODE
+      displayName: 'Run OPA Scan'
