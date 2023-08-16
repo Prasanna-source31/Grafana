@@ -14,8 +14,8 @@ deny_publicly_exposed_resources {
 # Rule to deny instances without required tags
 deny_missing_required_tags {
     required_tags := {"Environment", "Owner"}
-    resource_tags := {tag | tag = input.resource.attributes.tags[_].key}
-    not any(required_tags, tag)
+    resource_tags := {tag | tag = input.resource.attributes.tags[_].key; tag}
+    not any(required_tags, resource_tags)
 }
 
 # Rule to deny resources with sensitive tags in clear text
