@@ -18,6 +18,6 @@ stages:
       displayName: 'Download tool'
 
     - script: |
-        terrascan scan --directory ./ --exit-one
+        terrascan scan --directory 'https://github.com/Prasanna-source31/Grafana/' --exit-one
 
       displayName: 'Run Terrascan'
