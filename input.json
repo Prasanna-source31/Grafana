@@ -1,0 +1,11 @@
+{
+  "resources": [
+    {
+      "type": "aws_instance",
+      "id": "instance-123",
+      "tags": {
+        "Name": "my-instance"
+      }
+    }
+  ]
+}
