@@ -1,32 +1,30 @@
 package main
 
-# Rule to deny resources missing an "Environment" tag
-deny_missing_environment_tag {
-    resource_tags := input.resource.attributes.tags[_]
-    input.resource.type == "aws_instance"
-    not contains(resource_tags, {"key": "Environment", "value": _})
+# Rule to deny insecure security groups
+deny_insecure_security_group {
+    input.resource.type == "aws_security_group"
+    input.resource.attributes.ingress[_].cidr_blocks[_] == "0.0.0.0/0"
 }
 
-# Rule to deny resources missing an "Owner" tag
-deny_missing_owner_tag {
-    resource_tags := input.resource.attributes.tags[_]
-    input.resource.type == "aws_instance"
-    not contains(resource_tags, {"key": "Owner", "value": _})
+# Rule to deny publicly exposed resources
+deny_publicly_exposed_resources {
+    input.resource.attributes.public == true
 }
 
-# Rule to deny resources with an "Environment" tag that doesn't match a pattern
-deny_invalid_environment_tag {
-    resource_tags := input.resource.attributes.tags[_]
-    input.resource.type == "aws_instance"
-    env_value := resource_tags[_].value
-    not (env_value =~ "^(dev|test|prod)$")
+# Rule to deny instances without required tags
+deny_missing_required_tags {
+    required_tags := {"Environment", "Owner"}
+    resource_tags := input.resource.attributes.tags[_].key
+    not contains(required_tags, resource_tags)
 }
 
-# Rule to deny instances with an "Owner" tag that doesn't match a pattern
-deny_invalid_owner_tag {
-    resource_tags := input.resource.attributes.tags[_]
-    input.resource.type == "aws_instance"
-    owner_value := resource_tags[_].value
-    not (owner_value =~ "^[A-Za-z]+$")
+# Rule to deny resources with sensitive tags in clear text
+deny_sensitive_tags_clear_text {
+    input.resource.attributes.tags[_].value =~ "password|secret"
 }
 
+# Rule to deny S3 buckets with public access
+deny_public_s3_buckets {
+    input.resource.type == "aws_s3_bucket"
+    input.resource.attributes.public == true
+}
