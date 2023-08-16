@@ -12,6 +12,11 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: |
+        # Print value of $(Build.SourcesDirectory)
+        echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
+
+        # Print directory contents
+        ls -la $(Build.SourcesDirectory)
         # Pull the OPA Docker image
         docker pull openpolicyagent/opa:latest
 
