@@ -20,7 +20,7 @@ stages:
         echo "$TERRAFORM_FILES"
 
         # Run tfsec using the Docker image on your Terraform code
-        docker run --rm -v $(Build.SourcesDirectory):/tfsec aquasec/tfsec
+        docker run --rm -v $(Build.SourcesDirectory):/tfsec aquasec/tfsec -c /tfsec/.tfsec.yaml
 
         # Capture the exit code of the tfsec Docker container
         TFSEC_EXIT_CODE=$?
