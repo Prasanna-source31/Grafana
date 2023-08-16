@@ -16,7 +16,7 @@ steps:
   displayName: 'Install Terrascan'
 
 - script: |
-    terrascan scan -d ./ -o junit-xml > $(Build.ArtifactStagingDirectory)/Terrascan-Report.xml
+    terrascan scan -d ./ -o junit-xml > $(System.DefaultWorkingDirectory)/Terrascan-Report.xml
   displayName: 'Run Terrascan'
 
 - task: PublishPipelineArtifact@1
