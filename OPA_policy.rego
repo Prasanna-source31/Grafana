@@ -18,16 +18,15 @@ deny_missing_owner_tag {
 deny_invalid_environment_tag {
     resource_tags := input.resource.attributes.tags[_]
     input.resource.type == "aws_instance"
-    contains(resource_tags, {"key": "Environment", "value": env_value})
-    not env_value =~ "^(dev|test|prod)$"
+    env_value := resource_tags[_].value
+    not (env_value =~ "^(dev|test|prod)$")
 }
 
 # Rule to deny instances with an "Owner" tag that doesn't match a pattern
 deny_invalid_owner_tag {
     resource_tags := input.resource.attributes.tags[_]
     input.resource.type == "aws_instance"
-    contains(resource_tags, {"key": "Owner", "value": owner_value})
-    not owner_value =~ "^[A-Za-z]+$"
+    owner_value := resource_tags[_].value
+    not (owner_value =~ "^[A-Za-z]+$")
 }
-
 
