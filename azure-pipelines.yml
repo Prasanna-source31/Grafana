@@ -12,7 +12,7 @@ steps:
   displayName: 'Install Helm'
 
 - script: |
-    wget -qO- https://github.com/accurics/terrascan/releases/latest/download/terrascan_$(uname -s)_amd64.tar.gz | tar -xz -C /usr/local/bin terrascan && chmod +x /usr/local/bin/terrascan
+    wget -qO- https://github.com/accurics/terrascan/releases/download/v1.4.0/terrascan_1.4.0_Linux_x86_64.tar.gz | tar -xz -C /usr/local/bin terrascan && chmod +x /usr/local/bin/terrascan
   displayName: 'Install Terrascan'
 
 - script: |
