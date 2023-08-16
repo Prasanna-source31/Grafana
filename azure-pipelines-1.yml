@@ -21,7 +21,7 @@ stages:
         docker pull openpolicyagent/opa:latest
 
         # Run OPA against Terraform code using Docker
-        docker run --rm -v $(Build.SourcesDirectory):/data openpolicyagent/opa eval -i /data -f pretty -d OPA_policy.rego
+        docker run --rm -v $(Build.SourcesDirectory):/data openpolicyagent/opa eval -i /data -f pretty -d OPA_policy.rego 'data.main'
 
 
         # Capture the exit code of the OPA evaluation
