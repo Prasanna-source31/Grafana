@@ -1,0 +1,36 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: validate
+  jobs:
+  - job: SecurityScan
+    displayName: 'Run tfsec'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        curl -LJO https://github.com/tfsec/tfsec/releases/download/v0.59.5/tfsec-linux-amd64
+        chmod +x tfsec-linux-amd64
+        sudo mv tfsec-linux-amd64 /usr/local/bin/tfsec
+      displayName: 'Download tfsec'
+
+    - script: |
+        
+        # Run tfsec and capture the exit code
+        tfsec . > tfsec-report.txt
+        TFSEC_EXIT_CODE=$?
+
+        # Display the tfsec report
+        cat tfsec-report.txt
+
+        # Check the exit code and exit accordingly
+        if [ $TFSEC_EXIT_CODE -eq 0 ]; then
+          echo "tfsec scan passed successfully."
+        else
+          echo "tfsec scan failed with violations."
+        fi
+        exit $TFSEC_EXIT_CODE
+      displayName: 'Run tfsec'
