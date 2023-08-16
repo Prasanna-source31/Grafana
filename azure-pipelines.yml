@@ -24,4 +24,10 @@ stages:
     - script: |
         terrascan scan
         terrascan scan --directory ./
+        if [ $TERRASCAN_EXIT_CODE -eq 0 ]; then
+          echo "Terrascan scan passed successfully."
+        else
+          echo "Terrascan scan failed with violations."
+        fi
+        exit $TERRASCAN_EXIT_CODE
       displayName: 'Run Terrascan'
