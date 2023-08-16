@@ -23,7 +23,7 @@ stages:
 
     - script: |
         terrascan scan
-        terrascan scan --directory ./
+        terrascan scan --directory ./ --output junit-xml >$(System.DefaultWorkingDirectory)/Terrascan-Report.xml
         if [ $TERRASCAN_EXIT_CODE -eq 0 ]; then
           echo "Terrascan scan passed successfully."
         else
