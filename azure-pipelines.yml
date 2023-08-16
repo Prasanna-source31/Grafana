@@ -18,6 +18,6 @@ stages:
       displayName: 'Download tool'
 
     - script: |
-        terrascan scan --directory ./ --output junit-xml > $(System.DefaultWorkingDirectory)/Terrascan-Report.xml
+        terrascan scan --directory ./
 
       displayName: 'Run Terrascan'
