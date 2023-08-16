@@ -1,8 +1,33 @@
 package main
 
-default allow = false
-
-allow {
-    input.requester.age >= 18
+# Rule to deny resources missing an "Environment" tag
+deny_missing_environment_tag {
+    resource_tags := input.resource.attributes.tags[_]
+    input.resource.type == "aws_instance"
+    not contains(resource_tags, {"key": "Environment", "value": _})
 }
+
+# Rule to deny resources missing an "Owner" tag
+deny_missing_owner_tag {
+    resource_tags := input.resource.attributes.tags[_]
+    input.resource.type == "aws_instance"
+    not contains(resource_tags, {"key": "Owner", "value": _})
+}
+
+# Rule to deny resources with an "Environment" tag that doesn't match a pattern
+deny_invalid_environment_tag {
+    resource_tags := input.resource.attributes.tags[_]
+    input.resource.type == "aws_instance"
+    contains(resource_tags, {"key": "Environment", "value": env_value})
+    not env_value =~ "^(dev|test|prod)$"
+}
+
+# Rule to deny instances with an "Owner" tag that doesn't match a pattern
+deny_invalid_owner_tag {
+    resource_tags := input.resource.attributes.tags[_]
+    input.resource.type == "aws_instance"
+    contains(resource_tags, {"key": "Owner", "value": owner_value})
+    not owner_value =~ "^[A-Za-z]+$"
+}
+
 
