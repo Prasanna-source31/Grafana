@@ -1,22 +1,24 @@
 import os
 import re
 
-# Directory where your Kubernetes YAML files are located
-yaml_directory = "path/to/kubernetes/yaml/files"
+# Directory where your Terraform configuration files are located
+tf_directory = "path/to/terraform/files"
 
-# Generate an OPA policy that checks for specific labels in Kubernetes YAML
-def generate_opa_policy(labels):
-    policy = f'''
+# Generate an OPA policy that checks for specific attributes in Terraform resources
+def generate_opa_policy(attributes):
+    policy = '''
 package main
 
 default allow = false
 
 deny[msg] {
-    input.kind = "Pod"
-    {', '.join([f'not has_label("{label}")' for label in labels])}
-    msg = sprintf("Pod is missing required labels: {labels}")
+    some resource
+    input.resource.type = resource
+    %s
+    msg = sprintf("Resource is missing required attributes: %s", [missing_attributes])
 }
-    '''
+    ''' % (', '.join([f'not has_attribute(resource, "{attr}")' for attr in attributes]),
+           ', '.join(attributes))
     return policy
 
 # Check if a label exists in a YAML file
