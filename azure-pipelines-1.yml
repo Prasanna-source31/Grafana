@@ -7,36 +7,34 @@ stages:
 - stage: validate
   jobs:
   - job: SecurityScan
-    displayName: 'Run OPA Scan'
+    displayName: 'Run OPA Policy Checks'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
     - script: |
-       # Run the automatic policy generation script
-       python generate_policy.py
-       displayName: 'Generate OPA Policies'
-    - script: |
+        # Install conftest using Homebrew
+        brew install conftest
+
+        # Run the automatic policy generation with conftest
+        conftest generate -p policy-path -o OPA_policy.rego
+
         # Print value of $(Build.SourcesDirectory)
         echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
 
         # Print directory contents
         ls -la $(Build.SourcesDirectory)
-        # Pull the OPA Docker image
-        docker pull openpolicyagent/opa:latest
 
-        # Run OPA against Terraform code using Docker
-        docker run --rm -v $(Build.SourcesDirectory):/data openpolicyagent/opa eval -d /data/OPA_policy.rego 'data.main'
+        # Run conftest against Terraform code using generated policy
+        conftest test -p OPA_policy.rego $(Build.SourcesDirectory)
 
-
-
-        # Capture the exit code of the OPA evaluation
-        OPA_EXIT_CODE=$?
+        # Capture the exit code of conftest
+        CONFTEST_EXIT_CODE=$?
 
         # Check the exit code and exit accordingly
-        if [ $OPA_EXIT_CODE -eq 0 ]; then
-          echo "OPA scan passed successfully."
+        if [ $CONFTEST_EXIT_CODE -eq 0 ]; then
+          echo "OPA policy checks passed successfully."
         else
-          echo "OPA scan failed with policy violations."
+          echo "OPA policy checks failed with violations."
         fi
-        exit $OPA_EXIT_CODE
-      displayName: 'Run OPA Scan'
+        exit $CONFTEST_EXIT_CODE
+      displayName: 'Run OPA Policy Checks'
