@@ -26,7 +26,7 @@ stages:
         ls -la $(Build.SourcesDirectory)
 
         # Run OPA policy scan using conftest
-        conftest test -p $(Build.SourcesDirectory) -p /data/OPA_policy.rego
+        conftest test -p /data/OPA_policy.rego $(Build.SourcesDirectory)
 
         # Capture the exit code of conftest
         CONFTEST_EXIT_CODE=$?
