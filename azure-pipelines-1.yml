@@ -7,16 +7,17 @@ stages:
 - stage: validate
   jobs:
   - job: SecurityScan
-    displayName: 'Run OPA Policy Checks'
+    displayName: 'Run OPA Scan'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
     - script: |
-        # Install conftest using Homebrew
-        brew install conftest
+        # Install conftest using cURL
+        LATEST_VERSION=$(wget -O - "https://api.github.com/repos/open-policy-agent/conftest/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c 2-)
+        wget "https://github.com/open-policy-agent/conftest/releases/download/v${LATEST_VERSION}/conftest_${LATEST_VERSION}_Linux_x86_64.tar.gz"
+        tar xzf conftest_${LATEST_VERSION}_Linux_x86_64.tar.gz
+        sudo mv conftest /usr/local/bin
 
-        # Run the automatic policy generation with conftest
-        conftest generate -p policy-path -o OPA_policy.rego
 
         # Print value of $(Build.SourcesDirectory)
         echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
@@ -24,17 +25,17 @@ stages:
         # Print directory contents
         ls -la $(Build.SourcesDirectory)
 
-        # Run conftest against Terraform code using generated policy
-        conftest test -p OPA_policy.rego $(Build.SourcesDirectory)
+        # Run OPA policy scan using conftest
+        conftest test -p $(Build.SourcesDirectory) -p /data/OPA_policy.rego
 
         # Capture the exit code of conftest
         CONFTEST_EXIT_CODE=$?
 
         # Check the exit code and exit accordingly
         if [ $CONFTEST_EXIT_CODE -eq 0 ]; then
-          echo "OPA policy checks passed successfully."
+          echo "OPA scan passed successfully."
         else
-          echo "OPA policy checks failed with violations."
+          echo "OPA scan failed with policy violations."
         fi
         exit $CONFTEST_EXIT_CODE
-      displayName: 'Run OPA Policy Checks'
+      displayName: 'Run OPA Scan'
