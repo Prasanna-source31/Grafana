@@ -12,9 +12,9 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: |
-    # Run the automatic policy generation script
-    python generate_policy.py
-    displayName: 'Generate OPA Policies'
+       # Run the automatic policy generation script
+       python generate_policy.py
+       displayName: 'Generate OPA Policies'
     - script: |
         # Print value of $(Build.SourcesDirectory)
         echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
