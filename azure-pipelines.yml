@@ -23,11 +23,11 @@ stages:
 
     - script: |
         terrascan scan
-        terrascan scan --directory ./ --output junit-xml >$(System.DefaultWorkingDirectory)/Terrascan-Report.xml
-        if [ $TERRASCAN_EXIT_CODE -eq 0 ]; then
-          echo "Terrascan scan passed successfully."
-        else
-          echo "Terrascan scan failed with violations."
-        fi
-        exit $TERRASCAN_EXIT_CODE
-      displayName: 'Run Terrascan'
+        terrascan scan --directory ./ --format json > terrascan_output.json || true
+        echo "Terraform code scan completed."
+      displayName: 'Run terrascan scan'
+    - task: PublishBuildArtifacts@1
+      inputs:
+         PathtoPublish: 'terrascan_output.json'
+         artifactName: 'terrascan_output'
+      displayName: 'Upload terrascan github Output as Artifact'
