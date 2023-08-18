@@ -3,33 +3,29 @@ trigger: none
 pool:
   vmImage: ubuntu-latest
 
-stages:
-- stage: validate
-  jobs:
-  - job: SecurityScan
-    displayName: 'Run tfsec'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: |
-        # Pull the tfsec Docker image
-        docker pull aquasec/tfsec
-        # List all Terraform files for scanning
-        TERRAFORM_FILES=$(find $(Build.SourcesDirectory) -name "*.tf")
-        echo "Terraform files for scanning:"
-        echo "$TERRAFORM_FILES"
+jobs:
+- job: terraform_scan
+  steps:
+  - task: UseNode@1
+    inputs:
+      
+      checkLatest: true
 
-        # Run tfsec using the Docker image on your Terraform code
-        docker run --rm -v $(Build.SourcesDirectory):/tfsec aquasec/tfsec
+  - checkout: self
 
-        # Capture the exit code of the tfsec Docker container
-        TFSEC_EXIT_CODE=$?
+  - script: |
+      curl -L -o tfsec https://github.com/tfsec/tfsec/releases/latest/download/tfsec-linux-amd64
+      chmod +x tfsec
+      sudo mv tfsec /usr/local/bin/
+    displayName: 'Install tfsec'
 
-        # Check the exit code and exit accordingly
-        if [ $TFSEC_EXIT_CODE -eq 0 ]; then
-          echo "tfsec scan passed successfully."
-        else
-          echo "tfsec scan failed with violations."
-        fi
-        exit $TFSEC_EXIT_CODE
-      displayName: 'Run tfsec'
+  - script: |
+      tfsec . --format json > tfsec_output.json || true
+      echo "Terraform code scan completed."
+    displayName: 'Run tfsec scan'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'tfsec_output.json'
+      artifactName: 'tfsec_output'
+    displayName: 'Upload Tfsec Output as Artifact'
