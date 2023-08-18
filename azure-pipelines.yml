@@ -23,11 +23,11 @@ stages:
 
     - script: |
         terrascan scan
-        terrascan scan --directory ./ --format json > terrascan_output.json || true
+        terrascan scan --directory ./ --format xml > terrascan_output.xml || true
         echo "Terraform code scan completed."
       displayName: 'Run terrascan scan'
     - task: PublishBuildArtifacts@1
       inputs:
-         PathtoPublish: 'terrascan_output.json'
+         PathtoPublish: 'terrascan_output.xml'
          artifactName: 'terrascan_output'
       displayName: 'Upload terrascan github Output as Artifact'
