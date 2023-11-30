@@ -1,0 +1,84 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job: sonarqube_scan
+  steps:
+  - checkout: self
+
+  - task: SonarQubePrepare@4
+    inputs:
+      SonarQube: 'SonarQubeConnection'  # Use your configured service connection name
+      scannerMode: 'CLI'
+      configMode: 'automatic'
+      cliSources: '.'  # Specify the path to your source code
+      cliProjectVersion: '$(Build.BuildId)'
+      extraProperties: |
+        sonar.host.url=$(SonarQubeUrl)
+        sonar.login=$(SonarQubeToken)
+
+  - task: SonarQubeAnalyze@4
+
+  - task: SonarQubePublish@4
+    inputs:
+      pollingTimeoutSec: '300'
+
+- job: terraform_scan
+  dependsOn: sonarqube_scan
+  condition: and(succeeded('sonarqube_scan'), eq(variables['Build.QualityGateStatus'], 'OK'))
+  steps:
+  - checkout: self
+
+  - task: UseNode@1
+    inputs:
+      checkLatest: true
+
+  - script: |
+      curl -L -o tfsec https://github.com/tfsec/tfsec/releases/latest/download/tfsec-linux-amd64
+      chmod +x tfsec
+      sudo mv tfsec /usr/local/bin/
+    displayName: 'Install tfsec'
+
+  - script: |
+      tfsec . --format json > tfsec_azure_repo_output.json || true
+      echo "Terraform code scan completed."
+    displayName: 'Run tfsec azure repo scan'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'tfsec_azure_repo_output.json'
+      artifactName: 'tfsec_azure_repo_output'
+    displayName: 'Upload Tfsec azure repo Output as Artifact'
+
+- job: opa_scan
+  dependsOn: terraform_scan
+  condition: succeeded('terraform_scan')
+  steps:
+  - checkout: self
+
+  - script: |
+      # Print value of $(Build.SourcesDirectory)
+      echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
+
+      # Print directory contents
+      ls -la $(Build.SourcesDirectory)
+
+      # Pull the OPA Docker image
+      docker pull openpolicyagent/opa:latest
+
+      # Run OPA against Terraform code using Docker
+      docker run --rm -v $(Build.SourcesDirectory):/data openpolicyagent/opa eval -d /data/OPA_policy.rego 'data.main'
+
+      # Capture the exit code of the OPA evaluation
+      OPA_EXIT_CODE=$?
+
+      # Check the exit code and exit accordingly
+      if [ $OPA_EXIT_CODE -eq 0 ]; then
+        echo "OPA scan passed successfully."
+      else
+        echo "OPA scan failed with policy violations."
+        exit $OPA_EXIT_CODE
+      fi
+    displayName: 'Run OPA Scan'
