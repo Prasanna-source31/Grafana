@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Dispatch Shared Workflow
         run: |
-          curl -XPOST -H "Authorization: token ${{ secrets.workflow }}" \
+          curl -XPOST -H "Authorization: token ${{ secrets.WORKFLOW }}" \
                -H "Accept: application/vnd.github.everest-preview+json" \
                https://api.github.com/repos/Prasanna-source31/Test/dispatches \
                -d '{"event_type": "trigger-shared-workflow"}'
